@@ -30,24 +30,26 @@ void GNB::train(vector<vector<double>> data, vector<string> labels) {
           labels - array of N labels
             - Each label is one of "left", "keep", or "right".
   */
-  means.reserve(possible_labels.size());
-  stds.reserve(possible_labels.size());
+  int n_labels = possible_labels.size();
+  int n_features = data[0].size();
+  int n_samples = data.size();
 
-  for (int i_label = 0; i_label < possible_labels.size(); i_label++) {
-    means[i_label].reserve(data[0].size());
-    stds[i_label].reserve(data[0].size());
+  means.insert(means.begin(), n_labels, std::vector<double>(n_samples, 0.0));
+  stds.insert(stds.begin(), n_labels, std::vector<double>(n_samples, 0.0));
 
-    for (int i_feature = 0; i_feature < data[0].size(); i_feature++) {
-      for (int i_data = 0; i_data < data.size(); i_data++) {
-        means[i_label][i_feature] += data[i_data][i_feature];
+  for (int i_label = 0; i_label < n_labels; i_label++) {
+    for (int i_feature = 0; i_feature < n_features; i_feature++) {
+      for (int i_sample = 0; i_sample < n_samples; i_sample++) {
+        means[i_label][i_feature] += data[i_sample][i_feature];
       }
-      means[i_label][i_feature] /= data.size();
+      means[i_label][i_feature] /= n_samples;
 
       double sqr_sum = 0.0;
-      for (int i_data = 0; i_data < data.size(); i_data++) {
-        sqr_sum += pow(data[i_data][i_feature] - means[i_label][i_feature], 2);
+      for (int i_sample = 0; i_sample < n_samples; i_sample++) {
+        sqr_sum += pow(data[i_sample][i_feature] - means[i_label][i_feature], 2);
       }
-      stds[i_label][i_feature] = sqrt(sqr_sum / data.size());
+
+      stds[i_label][i_feature] = sqrt(sqr_sum / n_samples);
     }
   }
 }
@@ -69,18 +71,20 @@ string GNB::predict(vector<double> sample) {
           """
           # TODO - complete this
   */
+  int n_labels = possible_labels.size();
+  int n_features = sample.size();
   vector<double> probabilities(3, 1);
 
-  for (int i_label = 0; i_label < possible_labels.size(); i_label++) {
-    for (int i_feature = 0; i_feature < sample.size(); i_feature++) {
-      probabilities[i_label] *=
-          gaussian(sample[i_feature], means[i_label][i_feature],
-                   stds[i_label][i_feature]);
+  for (int i_label = 0; i_label < n_labels; i_label++) {
+    for (int i_feature = 0; i_feature < n_features; i_feature++) {
+      probabilities[i_label] *= gaussian(sample[i_feature],
+                                         means[i_label][i_feature],
+                                         stds[i_label][i_feature]);
     }
   }
 
   auto max_probability = std::max(probabilities.begin(), probabilities.end());
-	// std::cout << *max_probability << "\n";
+  // std::cout << *max_probability << "\n";
   int idx_label = std::distance(probabilities.begin(), max_probability);
 
   return this->possible_labels[idx_label];
