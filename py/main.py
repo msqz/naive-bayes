@@ -26,10 +26,10 @@ def load_y(path):
         return [line.rstrip() for line in f.readlines()]
 
 
-X_train = np.array(load_x('./data/train_states.txt'))
-y_train = np.array(load_y('./data/train_labels.txt'))
-X_test = np.array(load_x('./data/test_states.txt'))
-y_test = np.array(load_y('./data/test_labels.txt'))
+X_train = np.array(load_x('../data/train_states.txt'))
+y_train = np.array(load_y('../data/train_labels.txt'))
+X_test = np.array(load_x('../data/test_states.txt'))
+y_test = np.array(load_y('../data/test_labels.txt'))
 
 
 # build features
@@ -44,6 +44,7 @@ right = []
 
 
 for i in range(len(y_train)):
+    print(X_train[i])
     if y_train[i] == 'left':
         left.append(X_train[i])
     if y_train[i] == 'keep':
@@ -51,9 +52,9 @@ for i in range(len(y_train)):
     if y_train[i] == 'right':
         right.append(X_train[i])
 
-make_d_relative(left)
-make_d_relative(keep)
-make_d_relative(right)
+# make_d_relative(left)
+# make_d_relative(keep)
+# make_d_relative(right)
 
 left = np.array(left)
 keep = np.array(keep)
@@ -79,9 +80,10 @@ stds_keep = (((keep - mus_keep) ** 2).sum(0) / len(keep)) ** (1/2)
 stds_right = (((right - mus_right) ** 2).sum(0) / len(right)) ** (1/2)
 
 # predict
-make_d_relative(X_test)
+# make_d_relative(X_test)
 y_pred = []
 
+import pdb; pdb.set_trace()
 for sample in X_test:  # per data point
     p_left = 1
     p_keep = 1
